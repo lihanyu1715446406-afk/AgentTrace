@@ -5,6 +5,14 @@
 > An Autonomous AI Agent Observability and Diagnosis Platform.
 > 核心理念：让 AI Agent 不仅「观察」另一个 Agent，还能「理解、诊断、并帮助它变得更好」。
 
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+![LangGraph](https://img.shields.io/badge/LangGraph-blue)
+![MCP](https://img.shields.io/badge/MCP-purple)
+![License](https://img.shields.io/badge/License-MIT-green)
+
 ## 项目状态
 
 ✅ **M0~M8 已全部完成**（见 [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md)）。
@@ -71,6 +79,15 @@ Python 3.12 · LangGraph · LangChain · FastAPI · SQLAlchemy(asyncio) · Postg
 - **反思与评估**：证据检查、一致性检查、有限重分析；标准测试集 + 自动化评估 + LLM-as-a-Judge。
 - **开放（REST + MCP）**：REST API 供 SDK / Dashboard 使用；MCP Server 把只读诊断工具开放给其他 Agent。
 - **展示（Dashboard）**：React Dashboard 六页（总览 / Trace 浏览器 / Trace 详情 / AI 诊断 / 知识库 / 评估）。
+
+## 技术亮点
+
+- **安全鉴权**：API Key 用 sha256 哈希存储 + `secrets.compare_digest` 常数时间比较，服务端不存明文（ADR-0007）。
+- **无侵入埋点**：SDK 通过 contextvars 自动挂父子 Span，业务代码零改动即可采集 Trace / Span / Token，异步 HTTP 上报（ADR-0006）。
+- **语义单源**：MCP Server 复用 M1 的 LangChain 工具实现，REST / MCP / 内部工具返回同一套 JSON 语义。
+- **Human-in-the-loop**：Memory 的 Working 图通过 LangGraph `interrupt` / `Command(resume)` 在关键节点人工确认（ADR-0004）。
+- **语义记忆**：Episodic → Semantic 的 LLM 巩固（`distill` 注入点隔离 LLM），语义检索 + 去重。
+- **证据可追溯**：Reflection 对每条结论做证据检查（`SUPPORTED / MISSING / CONTRADICTED / UNVERIFIABLE`）。
 
 ## 目录结构
 
@@ -186,13 +203,21 @@ uv run python scripts/mcp_client_demo.py
 
 工具与 M1 的 LangChain 工具语义一一对应，返回同样的 JSON。详见 [mcp_server/README.md](mcp_server/README.md)。
 
-## 测试
+## 测试与代码质量
 
 ```bash
-uv run ruff check
-uv run pytest
-uv run mypy          # 可选，静态类型检查
+uv run ruff check                        # 静态检查（lint）
+uv run pytest                            # 单元 + 集成测试
+uv run mypy                              # 类型检查
+uv run pre-commit run --all-files        # 提交前检查
 ```
+
+| 项 | 结果 |
+|---|---|
+| pytest | ✅ 79 passed |
+| ruff | ✅ All checks passed |
+| mypy | ✅ 0 errors（133 files） |
+| 前端构建 | ✅ `npm run build` 通过（6 页面 chunk + 3 vendor chunk） |
 
 ## 环境变量
 
