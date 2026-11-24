@@ -132,6 +132,92 @@ cd frontend && npm install && npm run dev
 - 后端：http://localhost:8000（OpenAPI 文档 http://localhost:8000/docs）
 - 前端：http://localhost:5173
 
+## 使用教程
+
+> 前置：先完成上方「快速开始」的 1~5 步（服务已启动、演示数据已写入）。AI 诊断与知识库步骤需要配置对应 API Key（见「环境变量」）。
+
+### 1. 创建接入项目，获取 API Key
+
+```bash
+curl -X POST http://localhost:8000/projects \
+  -H "Content-Type: application/json" \
+  -d '{"name": "my-agent-project"}'
+```
+
+返回（`api_key` 仅此一次返回，请妥善保存）：
+
+```json
+{"project_id": "<uuid>", "name": "my-agent-project", "api_key": "agt_..."}
+```
+
+### 2. 用 SDK 无侵入采集 Trace
+
+```python
+from sdk.agenttrace import AgentTraceClient, Tracer, TraceCallbackHandler
+
+client = AgentTraceClient(
+    endpoint="http://localhost:8000",
+    api_key="<上一步的 api_key>",
+    project_id="<上一步的 project_id>",
+)
+tracer = Tracer(client)
+handler = TraceCallbackHandler(tracer)
+
+with tracer.trace("外部 Agent 诊断") as trace:
+    with tracer.span("agent_run", span_type="chain"):
+        await agent.ainvoke(
+            {"messages": [("user", "查询 tr-demo-001 详情")]},
+            config={"callbacks": [handler]},
+        )
+
+await client.flush(trace)  # 异步上报
+```
+
+完整可运行示例：`scripts/sdk_demo.py`。
+
+### 3. 在 Dashboard 查看 Trace
+
+打开 http://localhost:5173 →「Trace 浏览器」：选择项目、填 API Key、点「加载 Traces」；点击 Trace ID 进入详情，查看 spans / token / 成本。
+
+### 4. AI 诊断
+
+```bash
+# 单 Agent 诊断（M1）
+uv run python scripts/diagnose.py "查询 trace tr-demo-001 的详情"
+
+# Multi-Agent 综合诊断（M3）
+uv run python scripts/diagnose_multi.py "全面分析 demo-project 的健康状况"
+```
+
+或通过 REST API：
+
+```bash
+curl -X POST http://localhost:8000/diagnose \
+  -H "Content-Type: application/json" \
+  -d '{"query": "分析失败率最高的 trace"}'
+```
+
+### 5. 知识库（RAG）
+
+```bash
+docker compose up -d qdrant
+uv run python scripts/ingest_knowledge.py
+```
+
+把演示知识文档切分、向量化写入 Qdrant，后续诊断可检索知识库增强回答。
+
+### 6. 通过 MCP 开放诊断工具
+
+```bash
+# 启动 MCP Server（stdio）
+uv run python -m mcp_server.server
+
+# MCP Client 冒烟
+uv run python scripts/mcp_client_demo.py
+```
+
+把 `trace_query` / `span_query` / `cost_analysis` 三个只读工具以 MCP 协议开放给任意 MCP Client。
+
 ## Docker Compose 一键部署
 
 ```bash
