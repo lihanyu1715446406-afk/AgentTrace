@@ -39,6 +39,26 @@ flowchart LR
 3. **Reflection**：对每条结论做证据检查（`SUPPORTED / MISSING / CONTRADICTED / UNVERIFIABLE`）与一致性检查，必要时有限重分析。
 4. **Evaluation**：自动化评估（task_type_accuracy / tool_coverage / fact_coverage）+ LLM-as-a-Judge。
 
+## 界面预览
+
+| 页面 | 说明 |
+|---|---|
+| 总览 | 全局指标、模型 Token 占比、最近 Trace |
+| Trace 浏览器 | 按项目 + API Key 查询 Trace 列表 |
+| Trace 详情 | spans + token 用量 |
+| 评估 | 标准测试集与指标 |
+| 知识库 | 知识库文档列表 |
+
+![总览](docs/images/overview.png)
+
+![Trace 浏览器](docs/images/trace-explorer.png)
+
+![Trace 详情](docs/images/trace-detail.png)
+
+![评估](docs/images/evaluation.png)
+
+![知识库](docs/images/knowledge.png)
+
 ## 技术栈
 
 Python 3.12 · LangGraph · LangChain · FastAPI · SQLAlchemy(asyncio) · PostgreSQL · Qdrant · MCP · React 18 + TypeScript + Vite + Ant Design + ECharts · Docker

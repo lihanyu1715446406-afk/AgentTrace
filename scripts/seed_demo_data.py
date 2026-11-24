@@ -24,13 +24,16 @@ from backend.app.services.ingest_service import hash_api_key  # noqa: E402
 
 async def _seed() -> None:
     async with async_session_factory() as session:
+        demo_key = "agt_demo_key"
         existing = await session.execute(select(Project).where(Project.name == "demo-project"))
-        if existing.scalar_one_or_none() is not None:
-            print("演示数据已存在，跳过写入。")
+        existing_project = existing.scalar_one_or_none()
+        if existing_project is not None:
+            existing_project.api_key_hash = hash_api_key(demo_key)
+            await session.commit()
+            print("演示数据已存在，已更新其 API Key 哈希。")
             return
 
         now = datetime.now(UTC)
-        demo_key = "agt_demo_key"
         project = Project(name="demo-project", api_key_hash=hash_api_key(demo_key))
         session.add(project)
         await session.flush()
