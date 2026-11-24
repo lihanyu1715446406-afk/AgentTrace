@@ -187,3 +187,7 @@ uv run mypy          # 可选，静态类型检查
 
 - 项目规划：[docs/00-项目规划/](docs/00-项目规划/)
 - 开发进度：[docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md)
+
+## License
+
+[MIT](LICENSE) © 2026 LIHANYU

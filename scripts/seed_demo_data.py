@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from backend.app.core.database import async_session_factory  # noqa: E402
 from backend.app.models import Project, Span, TokenUsage, Trace  # noqa: E402
+from backend.app.services.ingest_service import hash_api_key  # noqa: E402
 
 
 async def _seed() -> None:
@@ -29,7 +30,8 @@ async def _seed() -> None:
             return
 
         now = datetime.now(UTC)
-        project = Project(name="demo-project", api_key_hash="demo-hash-not-a-real-key")
+        demo_key = "agt_demo_key"
+        project = Project(name="demo-project", api_key_hash=hash_api_key(demo_key))
         session.add(project)
         await session.flush()
 
@@ -119,6 +121,7 @@ async def _seed() -> None:
         await session.commit()
 
     print("演示数据写入完成：demo-project，2 条 trace，3 条 span，2 条 token 用量。")
+    print(f"Demo API Key（Trace 浏览器中填写）：{demo_key}")
 
 
 def main() -> None:
