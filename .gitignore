@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# 环境与密钥
+.env
+*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Node / 前端
+node_modules/
+frontend/dist/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# 日志
+*.log
+
+# 学习文档（不提交；仅保留 00-项目规划 与 PROJECT_STATUS.md）
+docs/02-Agent基础/
+docs/03-Tool-Calling/
+docs/04-Planning/
+docs/05-Multi-Agent/
+docs/06-RAG/
+docs/07-Memory/
+docs/08-Reflection/
+docs/09-Evaluation/
+docs/10-SDK与数据采集/
+docs/11-MCP/
+docs/12-工程化/
+docs/13-项目源码解析/
+docs/README.md
