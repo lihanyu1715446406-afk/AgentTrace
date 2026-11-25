@@ -13,6 +13,33 @@
 ![MCP](https://img.shields.io/badge/MCP-purple)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
+## 项目背景
+
+AI Agent 的落地难点，除了「能不能跑通」，更在于「跑不通时能不能说清楚为什么」。一次 Agent 执行往往由任务规划、多次 LLM 调用、Tool 调用、RAG 检索、记忆读写和多角色协作组成，链路长、分支多、结果不确定。传统日志和单轮调试很难回答这些问题：
+
+- 这一轮到底走了哪条路径？在哪一步开始偏离预期？
+- Token 和耗时主要花在哪里？换 Prompt 或模型之后是变好还是变差？
+- 出错时依据了哪些知识、哪几次工具返回？结论有没有证据支撑？
+- 上一个项目踩过的坑，能不能被检索、复用，而不是每次都靠人肉排查？
+
+同时，现有工具大多停留在「采集 + 展示」：能看到调用链的延迟，却理解不了 Agent 的语义——不知道一次回答依据了哪条知识、为什么选择这个工具。排障仍然高度依赖个人经验，知识无法沉淀。
+
+AgentTrace 想补上的正是这一段：让 AI Agent 不仅能被「观察」，还能被「理解、诊断，并在用户授权后变得更好」。
+
+## 项目介绍
+
+AgentTrace 是一个基于 **Multi-Agent** 的 AI Agent **自主诊断与优化平台**，使用 Python + LangGraph + FastAPI + PostgreSQL + Qdrant 构建，配套 Python SDK、MCP Server 和 React Dashboard。
+
+它的工作闭环是：
+
+1. **理解执行轨迹**：通过 SDK 无侵入采集 Trace / Span / Token，还原 Agent 每一步做了什么、花了多少成本。
+2. **分析异常与成本**：Planning 拆解问题，Multi-Agent（Trace / Error / Cost 分析 + Report Agent）并行分析并汇总。
+3. **检索历史故障知识**：基于 Qdrant 的 RAG 检索运维手册与历史案例，长期记忆沉淀 Episodic / Semantic 经验。
+4. **交叉验证与反思**：Reflection 对每条结论做证据检查与一致性检查，必要时进行有限次重分析。
+5. **输出带证据链的诊断报告**：结论可追溯到具体的 Trace / Span / 知识条目，并由 Evaluation 给出自动化评估指标。
+
+与只做「看板」的观测工具不同，AgentTrace 的目标是把 Planning、Multi-Agent、RAG、Memory、Tool Calling、Evaluation 六个方向真正串成一条可运行的诊断链路——M0~M8 每个阶段都有真实可运行的产出，而非 mock 演示。
+
 ## 项目状态
 
 ✅ **M0~M8 已全部完成**（见 [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md)）。
@@ -22,10 +49,10 @@
 ```mermaid
 flowchart LR
     Agent["业务 Agent<br/>(LangGraph / LangChain)"] -->|"SDK 无侵入埋点"| SDK["Python SDK<br/>Tracer · Trace · Span · Token"]
-    SDK -->|"HTTP 异步上报<br/>X-API-Key 鉴权"| Backend["FastAPI 后端<br/>REST API"]
-    Backend -->|"SQLAlchemy asyncio"| PG[("PostgreSQL<br/>Trace / 记忆 / 项目")]
-    Backend -->|"向量检索"| QD[("Qdrant<br/>RAG 知识库")]
-    Backend -->|"REST (JSON)"| Web["React Dashboard<br/>6 页"]
+    SDK -->|"HTTP 异步上报 · X-API-Key 鉴权"| Backend["FastAPI 后端<br/>REST API"]
+    Backend -->|"SQLAlchemy asyncio"| PG["PostgreSQL<br/>Trace / 记忆 / 项目"]
+    Backend -->|"向量检索"| QD["Qdrant<br/>RAG 知识库"]
+    Backend -->|"REST JSON"| Web["React Dashboard<br/>6 页"]
     Backend -->|"MCP stdio"| MCPS["MCP Server<br/>只读诊断工具"]
 ```
 
