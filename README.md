@@ -280,6 +280,8 @@ docker compose up -d --build
 
 > `POST /projects` 返回的一次性明文 API Key 用于 SDK 上报与 `/traces` 查询；服务端只存哈希。
 
+> 上表是**直连后端**（`http://localhost:8000`）的路径，SDK 默认按此访问。Dashboard 经 Vite / nginx 同源访问时统一带 `/api` 前缀（如 `/api/traces`、`/api/evaluation/dataset`），由代理去掉前缀后转发，避免与前端路由 `/traces`、`/evaluation` 冲突。
+
 ## SDK 使用
 
 ```python

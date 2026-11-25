@@ -1,20 +1,19 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// 开发环境把 API 请求代理到后端（localhost:8000），避免跨域。
-// 生产环境由 nginx 反向代理同路径（见 frontend/nginx.conf）。
+// 开发环境把 /api 前缀的请求代理到后端（localhost:8000）并去掉前缀，避免跨域。
+// 生产环境由 nginx 做同样的反向代理（见 frontend/nginx.conf）。
+// 只代理 /api 可以避免与 SPA 路由（/traces、/evaluation 等）冲突。
 export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
     proxy: {
-      "/health": "http://localhost:8000",
-      "/overview": "http://localhost:8000",
-      "/projects": "http://localhost:8000",
-      "/traces": "http://localhost:8000",
-      "/diagnose": "http://localhost:8000",
-      "/knowledge": "http://localhost:8000",
-      "/evaluation": "http://localhost:8000",
+      "/api": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
     },
   },
   build: {
